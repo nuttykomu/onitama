@@ -1,0 +1,11 @@
+{
+  "name": "onitama",
+  "version": "1.0.0",
+  "description": "Onitama MCTS AI Agent",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nuttykomu (ナッティ)",
+  "license": "MIT"
+}
