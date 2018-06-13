@@ -1,6 +1,7 @@
 #include <ctime>
 #include <random>
 
+#include "Card.h"
 #include "State.h"
 
 GameState getNewGameState() {
@@ -27,10 +28,10 @@ GameState getNewGameState() {
     }
 
     // 3. Determine who goes first.
-
-    // ╔═════════════════════════════════════════════════════╗
-    // ║ TODO: Implement this after implementing move cards. ║
-    // ╚═════════════════════════════════════════════════════╝
+    const int EXTRA_CARD_OFFSET = 16;
+    int extraCardMask = (0b1111 << EXTRA_CARD_OFFSET);
+    int extraCardIndex = (state.cards & extraCardMask) >> EXTRA_CARD_OFFSET;
+    state.turn = CardList[extraCardIndex].color;
 
     return state;
 }
@@ -50,6 +51,7 @@ int *getBluePositions(GameState state) {
     // ╚════════════════════════════════╝
 
 }
+
 int *getRedPositions(GameState state) {
 
     // ╔════════════════════════════════╗
