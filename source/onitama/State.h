@@ -31,13 +31,13 @@ struct GameState {
     uint32_t turn;
 };
 
-GameState getNewGameState();
-GameState applyMove(GameState state, int move);
+extern GameState getNewGameState();
+extern GameState applyMove(GameState state, int move);
 
-int *getBluePositions(GameState state);
-int *getRedPositions(GameState state);
+extern int *getBluePositions(GameState state);
+extern int *getRedPositions(GameState state);
 
-bool blueWon(GameState state);
-bool redWon(GameState state);
+extern bool blueWon(GameState state);
+extern bool redWon(GameState state);
 
 #endif
