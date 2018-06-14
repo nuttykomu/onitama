@@ -85,6 +85,24 @@ int getMasterPosition(GameState state, int color) {
     return (state.pieces & positionMask) >> positionOffset;
 }
 
+std::vector<Card> getCards(GameState state, int color) {
+    std::vector<Card> cards;
+    int colorOffset = (color == BLUE) ? 0 : 8;
+    for (int i = 0; i < 2; i++) {
+        uint32_t cardMask = 0b1111 << (colorOffset + i * 4);
+        uint32_t cardIndex = (state.cards & cardMask) >> (colorOffset + i * 4);
+        cards.push_back(CardList[cardIndex]);
+    }
+    return cards;
+}
+
+Card getExtraCard(GameState state) {
+    int offset = 16;
+    uint32_t cardMask = 0b1111 << offset;
+    uint32_t cardIndex = (state.cards & cardMask) >> offset;
+    return CardList[cardIndex];
+}
+
 bool blueWon(GameState state) {
     bool blueMasterReachedTemple = getMasterPosition(state, BLUE) == 22;
     bool redMasterCaptured = state.pieces & (1 << 30);
