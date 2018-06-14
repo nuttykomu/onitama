@@ -36,9 +36,9 @@ struct GameState {
 };
 
 struct Move {
-    int32_t card;
-    int32_t start;
-    int32_t end;
+    uint32_t card;
+    uint32_t start;
+    uint32_t end;
 };
 
 extern GameState getNewGameState();
