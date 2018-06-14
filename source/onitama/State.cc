@@ -66,7 +66,6 @@ Move *getMoves(GameState state) {
 std::vector<int> getPawnPositions(GameState state, int color) {
     std::vector<int> positions;
     int colorOffset = (color == BLUE) ? 6 : 36;
-
     for (int i = 0; i < 4; i++) {
         bool isCaptured = state.pieces & (1 << colorOffset + i * 6);
         if (!isCaptured) {
@@ -75,7 +74,6 @@ std::vector<int> getPawnPositions(GameState state, int color) {
             positions.push_back(position);
         }
     }
-
     return positions;
 }
 
@@ -103,14 +101,10 @@ Card getExtraCard(GameState state) {
     return CardList[cardIndex];
 }
 
-bool blueWon(GameState state) {
-    bool blueMasterReachedTemple = getMasterPosition(state, BLUE) == 22;
-    bool redMasterCaptured = state.pieces & (1 << 30);
-    return blueMasterReachedTemple | redMasterCaptured;
-}
-
-bool redWon(GameState state) {
-    bool redMasterReachedTemple = getMasterPosition(state, RED) == 2;
-    bool blueMasterCaptured = state.pieces & 1;
-    return redMasterReachedTemple | blueMasterCaptured;
+bool hasVictory(GameState state, int color) {
+    int TEMPLE_ARCH = (color == BLUE) ? 22 : 2;
+    int ENEMY_MASTER = (color == BLUE) ? 30 : 0;
+    bool reachedTemple = getMasterPosition(state, color) == TEMPLE_ARCH;
+    bool capturedMaster = state.pieces & (1 << ENEMY_MASTER);
+    return reachedTemple | capturedMaster;
 }

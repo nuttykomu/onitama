@@ -51,7 +51,6 @@ extern int getMasterPosition(GameState state, int color);
 extern std::vector<Card> getCards(GameState state, int color);
 extern Card getExtraCard(GameState state);
 
-extern bool blueWon(GameState state);
-extern bool redWon(GameState state);
+extern bool hasVictory(GameState state, int color);
 
 #endif
