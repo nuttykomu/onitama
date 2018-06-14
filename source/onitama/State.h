@@ -44,7 +44,7 @@ struct Move {
 extern GameState getNewGameState();
 extern GameState applyMove(GameState state, int move);
 
-extern Move *getMoves(GameState state);
+extern std::vector<Move> getMoves(GameState state);
 extern std::vector<int> getPawnPositions(GameState state, int color);
 extern int getMasterPosition(GameState state, int color);
 

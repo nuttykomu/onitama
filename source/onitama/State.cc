@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <ctime>
 #include <random>
 #include <set>
@@ -55,12 +56,56 @@ GameState applyMove(GameState state, int move) {
 
 }
 
-Move *getMoves(GameState state) {
+std::vector<Move> getMoves(GameState state) {
+    // Get all starting positions.
+    std::vector<int> positions = getPawnPositions(state, state.turn);
+    positions.push_back(getMasterPosition(state, state.turn));
+    std::vector<Move> moves;
 
-    // ╔════════════════════════════════╗
-    // ║ TODO: Implement this function. ║
-    // ╚════════════════════════════════╝
+    // For each position, enumerate all possible candidate moves.
+    for (int position : positions) {
+        for (const Card card : getCards(state, state.turn)) {
+            for (const M move : card.moves) {
 
+                // If RED turn, rotate the board.
+                int startPosition = position;
+                if (state.turn == RED) {
+                    startPosition = 24 - position;
+                }
+
+                // Generate candidate move.
+                int shiftX = -move.x;
+                int shiftY = move.y * 5;
+                int endPosition = startPosition + shiftX + shiftY;
+
+                // Test candidate move for valid end position.
+                int startRow = startPosition / 5;
+                int endRow = (startPosition + shiftX) / 5;
+                bool validXShift = startRow == endRow;
+                bool validYShift = endPosition >= 0 && endPosition < 25;
+
+                // Rotate the board back to original orientation.
+                if (state.turn == RED) {
+                    startPosition = 24 - startPosition;
+                    endPosition = 24 - endPosition;
+                }
+
+                // Test candidate move for friendly fire.
+                auto iterator = std::find(positions.begin(), positions.end(), endPosition);
+                bool noFriendlyFire = iterator == positions.end();
+
+                if (validXShift && validYShift && noFriendlyFire) {
+                    Move move = {
+                        /* Card:  */ card.index,
+                        /* Start: */ (unsigned)startPosition,
+                        /* End:   */ (unsigned)endPosition
+                    };
+                    moves.push_back(move);
+                }
+            }
+        }
+    }
+    return moves;
 }
 
 std::vector<int> getPawnPositions(GameState state, int color) {
