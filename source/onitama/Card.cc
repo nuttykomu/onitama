@@ -3,69 +3,69 @@
 const int BLUE = 0;
 const int RED = 1;
 
-Card CardList[] = {
+std::vector<Card> CardList = {
     {
-        /* Name:  */ "BOAR", RED,
+        /* Name:  */ "BOAR", RED, 0,
         /* Moves: */ { M(-1, 0), M(0, 1), M(1, 0) }
     },
     {
-        /* Name:  */ "COBRA", RED,
+        /* Name:  */ "COBRA", RED, 1,
         /* Moves: */ { M(-1, 0), M(1, -1), M(1, 1) }
     },
     {
-        /* Name:  */ "CRAB", BLUE,
+        /* Name:  */ "CRAB", BLUE, 2,
         /* Moves: */ { M(-2, 0), M(0, 1), M(2, 0) }
     },
     {
-        /* Name:  */ "CRANE", BLUE,
+        /* Name:  */ "CRANE", BLUE, 3,
         /* Moves: */ { M(-1, -1), M(0, 1), M(1, -1) }
     },
     {
-        /* Name:  */ "DRAGON", RED,
+        /* Name:  */ "DRAGON", RED, 4,
         /* Moves: */ { M(-2, 1), M(-1, -1), M(1, -1), M(2, 1) }
     },
     {
-        /* Name:  */ "EEL", BLUE,
+        /* Name:  */ "EEL", BLUE, 5,
         /* Moves: */ { M(-1, -1), M(-1, 1), M(1, 0) }
     },
     {
-        /* Name:  */ "ELEPHANT", RED,
+        /* Name:  */ "ELEPHANT", RED, 6,
         /* Moves: */ { M(-1, 0), M(-1, 1), M(1, 0), M(1, 1) }
     },
     {
-        /* Name:  */ "FROG", RED,
+        /* Name:  */ "FROG", RED, 7,
         /* Moves: */ { M(-2, 0), M(-1, 1), M(1, -1) }
     },
     {
-        /* Name:  */ "GOOSE", BLUE,
+        /* Name:  */ "GOOSE", BLUE, 8,
         /* Moves: */ { M(-1, 0), M(-1, 1), M(1, 0), M(1, -1) }
     },
     {
-        /* Name:  */ "HORSE", RED,
+        /* Name:  */ "HORSE", RED, 9,
         /* Moves: */ { M(-1, 0), M(0, -1), M(0, 1) }
     },
     {
-        /* Name:  */ "MANTIS", RED,
+        /* Name:  */ "MANTIS", RED, 10,
         /* Moves: */ { M(-1, 1), M(0, -1), M(1, 1) }
     },
     {
-        /* Name:  */ "MONKEY", BLUE,
+        /* Name:  */ "MONKEY", BLUE, 11,
         /* Moves: */ { M(-1, -1), M(-1, 1), M(1, -1), M(1, 1) }
     },
     {
-        /* Name:  */ "OX", BLUE,
+        /* Name:  */ "OX", BLUE, 12,
         /* Moves: */ { M(0, -1), M(0, 1), M(1, 0) }
     },
     {
-        /* Name:  */ "RABBIT", BLUE,
+        /* Name:  */ "RABBIT", BLUE, 13,
         /* Moves: */ { M(-1, -1), M(1, 1), M(2, 0) }
     },
     {
-        /* Name:  */ "ROOSTER", RED,
+        /* Name:  */ "ROOSTER", RED, 14,
         /* Moves: */ { M(-1, -1), M(-1, 0), M(1, 0), M(1, 1) }
     },
     {
-        /* Name:  */ "TIGER", BLUE,
+        /* Name:  */ "TIGER", BLUE, 15,
         /* Moves: */ { M(0, -1), M(0, 2) }
     }
 };

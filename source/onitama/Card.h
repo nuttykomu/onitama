@@ -13,9 +13,10 @@ struct M {
 struct Card {
     std::string name;
     uint32_t color;
+    uint32_t index;
     std::vector<M> moves;
 };
 
-extern Card CardList[16];
+extern std::vector<Card> CardList;
 
 #endif
