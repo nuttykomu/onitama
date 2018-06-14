@@ -41,16 +41,36 @@ struct Move {
     uint32_t end;
 };
 
+// Search predicate for finding moves in containers.
+// Intended to be used with std::find_if.
+// https://stackoverflow.com/a/590005
+struct findMove {
+    uint32_t card;
+    uint32_t start;
+    uint32_t end;
+
+    findMove(Move move) : 
+        card(move.card),
+        start(move.start), 
+        end(move.end) {}
+
+    bool operator() (const Move& move) const {
+        return move.card == card &&
+               move.start == start &&
+               move.end == end;
+    }
+};
+
 extern GameState getNewGameState();
-extern GameState applyMove(GameState state, int move);
+extern bool hasVictory(GameState state, int color);
 
 extern std::vector<Move> getMoves(GameState state);
+extern GameState applyMove(GameState state, Move move);
+
 extern std::vector<int> getPawnPositions(GameState state, int color);
 extern int getMasterPosition(GameState state, int color);
 
 extern std::vector<Card> getCards(GameState state, int color);
 extern Card getExtraCard(GameState state);
-
-extern bool hasVictory(GameState state, int color);
 
 #endif

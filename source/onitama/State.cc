@@ -3,7 +3,6 @@
 #include <random>
 #include <set>
 #include <vector>
-
 #include "Card.h"
 #include "State.h"
 
@@ -48,12 +47,12 @@ GameState getNewGameState() {
     return state;
 }
 
-GameState applyMove(GameState state, int move) {
-
-    // ╔════════════════════════════════╗
-    // ║ TODO: Implement this function. ║
-    // ╚════════════════════════════════╝
-
+bool hasVictory(GameState state, int color) {
+    int TEMPLE_ARCH = (color == BLUE) ? 22 : 2;
+    int ENEMY_MASTER = (color == BLUE) ? 30 : 0;
+    bool reachedTemple = getMasterPosition(state, color) == TEMPLE_ARCH;
+    bool capturedMaster = state.pieces & (1 << ENEMY_MASTER);
+    return reachedTemple | capturedMaster;
 }
 
 std::vector<Move> getMoves(GameState state) {
@@ -108,6 +107,53 @@ std::vector<Move> getMoves(GameState state) {
     return moves;
 }
 
+GameState applyMove(GameState state, Move move) {
+    std::vector<Move> validMoves = getMoves(state);
+    auto iterator = std::find_if(validMoves.begin(), validMoves.end(), findMove(move));
+    bool isValidMove = iterator != validMoves.end();
+    
+    if (isValidMove) {
+        // Update the piece position.
+        int colorOffset = (state.turn == BLUE) ? 1 : 31;
+        for (int i = 0; i < 5; i++) {
+            uint64_t positionMask = 0b11111LL << (colorOffset + i * 6);
+            uint64_t position = (state.pieces & positionMask) >> (colorOffset + i * 6);
+            if (position == move.start) {
+                state.pieces &= ~(0b11111LL << (colorOffset + i * 6));
+                state.pieces |= (long long)move.end << (colorOffset + i * 6);
+            }
+        }
+
+        // Capture the enemy piece (if applicable).
+        colorOffset = (state.turn == BLUE) ? 31 : 1;
+        for (int i = 0; i < 5; i++) {
+            uint64_t positionMask = 0b11111LL << (colorOffset + i * 6);
+            uint64_t position = (state.pieces & positionMask) >> (colorOffset + i * 6);
+            if (position == move.end) {
+                state.pieces |= 1LL << (colorOffset + i * 6 - 1);
+            }
+        }
+
+        // Swap the used card with the extra card.
+        colorOffset = (state.turn == BLUE) ? 0 : 8;
+        for (int i = 0; i < 2; i++) {
+            uint32_t cardMask = 0b1111 << (colorOffset + i * 4);
+            uint32_t cardIndex = (state.cards & cardMask) >> (colorOffset + i * 4);
+            if (cardIndex == move.card) {
+                state.cards &= ~(0b1111 << (colorOffset + i * 4));
+                state.cards |= getExtraCard(state).index << (colorOffset + i * 4);
+                state.cards &= ~(0b1111 << 16);
+                state.cards |= move.card << 16;
+            }
+        }
+
+        // Update the turn color.
+        state.turn = (state.turn == BLUE) ? RED : BLUE;
+    }
+
+    return state;
+}
+
 std::vector<int> getPawnPositions(GameState state, int color) {
     std::vector<int> positions;
     int colorOffset = (color == BLUE) ? 6 : 36;
@@ -144,12 +190,4 @@ Card getExtraCard(GameState state) {
     uint32_t cardMask = 0b1111 << offset;
     uint32_t cardIndex = (state.cards & cardMask) >> offset;
     return CardList[cardIndex];
-}
-
-bool hasVictory(GameState state, int color) {
-    int TEMPLE_ARCH = (color == BLUE) ? 22 : 2;
-    int ENEMY_MASTER = (color == BLUE) ? 30 : 0;
-    bool reachedTemple = getMasterPosition(state, color) == TEMPLE_ARCH;
-    bool capturedMaster = state.pieces & (1 << ENEMY_MASTER);
-    return reachedTemple | capturedMaster;
 }
