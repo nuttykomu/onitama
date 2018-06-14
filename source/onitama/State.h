@@ -31,9 +31,16 @@ struct GameState {
     uint32_t turn;
 };
 
+struct Move {
+    int32_t card;
+    int32_t start;
+    int32_t end;
+};
+
 extern GameState getNewGameState();
 extern GameState applyMove(GameState state, int move);
 
+extern Move *getMoves(GameState state);
 extern int *getBluePositions(GameState state);
 extern int *getRedPositions(GameState state);
 

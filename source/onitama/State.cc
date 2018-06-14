@@ -44,6 +44,14 @@ GameState applyMove(GameState state, int move) {
 
 }
 
+Move *getMoves(GameState state) {
+
+    // ╔════════════════════════════════╗
+    // ║ TODO: Implement this function. ║
+    // ╚════════════════════════════════╝
+
+}
+
 int *getBluePositions(GameState state) {
 
     // ╔════════════════════════════════╗
