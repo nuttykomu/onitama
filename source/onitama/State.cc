@@ -1,5 +1,6 @@
 #include <ctime>
 #include <random>
+#include <set>
 #include <vector>
 
 #include "Card.h"
@@ -25,10 +26,16 @@ GameState getNewGameState() {
 
     // 2. Draw five move cards randomly.
     std::default_random_engine rng((unsigned int)time(0));
-    std::uniform_int_distribution<int> draw(0, 15);
+    std::uniform_int_distribution<int> generateCard(0, 15);
+    std::set<int> cardsDrawn;
 
-    for (int i = 0; i < 5; i++) {
-        state.cards |= draw(rng) << (i * 4);
+    while (cardsDrawn.size() < 5) {
+        cardsDrawn.insert(generateCard(rng));
+    }
+
+    int i = 0;
+    for (int card : cardsDrawn) {
+        state.cards |= card << (i++ * 4);
     }
 
     // 3. Determine who goes first.
