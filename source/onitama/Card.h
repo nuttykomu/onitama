@@ -3,16 +3,17 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
-struct Vector {
-    int32_t x;
-    int32_t y;
+struct M {
+    M(int32_t x, int32_t y) : x(x), y(y) { }
+    int32_t x, y;
 };
 
 struct Card {
     std::string name;
     uint32_t color;
-    Vector moves[4];
+    std::vector<M> moves;
 };
 
 extern Card CardList[16];
