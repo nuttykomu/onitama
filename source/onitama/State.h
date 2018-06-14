@@ -1,6 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include <vector>
+
 struct GameState {
     // Each pawn and master is encoded in `pieces` using 6 bits each:
     // 1 bit to store their state (captured or not captured?), and
@@ -41,8 +43,8 @@ extern GameState getNewGameState();
 extern GameState applyMove(GameState state, int move);
 
 extern Move *getMoves(GameState state);
-extern int *getBluePositions(GameState state);
-extern int *getRedPositions(GameState state);
+extern std::vector<int> getPawnPositions(GameState state, int color);
+extern int getMasterPosition(GameState state, int color);
 
 extern bool blueWon(GameState state);
 extern bool redWon(GameState state);

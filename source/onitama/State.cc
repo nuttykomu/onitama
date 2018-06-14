@@ -1,8 +1,12 @@
 #include <ctime>
 #include <random>
+#include <vector>
 
 #include "Card.h"
 #include "State.h"
+
+const int BLUE = 0;
+const int RED = 1;
 
 GameState getNewGameState() {
     GameState state = {};
@@ -52,47 +56,36 @@ Move *getMoves(GameState state) {
 
 }
 
-int *getBluePositions(GameState state) {
+std::vector<int> getPawnPositions(GameState state, int color) {
+    std::vector<int> positions;
+    int colorOffset = (color == BLUE) ? 6 : 36;
 
-    // ╔════════════════════════════════╗
-    // ║ TODO: Implement this function. ║
-    // ╚════════════════════════════════╝
+    for (int i = 0; i < 4; i++) {
+        bool isCaptured = state.pieces & (1 << colorOffset + i * 6);
+        if (!isCaptured) {
+            uint64_t positionMask = 0b11111LL << (colorOffset + i * 6 + 1);
+            uint64_t position = (state.pieces & positionMask) >> (colorOffset + i * 6 + 1);
+            positions.push_back(position);
+        }
+    }
 
+    return positions;
 }
 
-int *getRedPositions(GameState state) {
-
-    // ╔════════════════════════════════╗
-    // ║ TODO: Implement this function. ║
-    // ╚════════════════════════════════╝
-
+int getMasterPosition(GameState state, int color) {
+    int positionOffset = (color == BLUE) ? 1 : 31;
+    uint64_t positionMask = 0b11111LL << positionOffset;
+    return (state.pieces & positionMask) >> positionOffset;
 }
 
 bool blueWon(GameState state) {
-    const int RED_TEMPLE_ARCH_POSITION = 22;
-    const int BLUE_MASTER_POSITION = 1;
-    const int RED_MASTER_STATUS = 30;
-
-    // 🌊 Way of the Stream.
-    uint64_t blueMasterPositionMask = 0b11111 << BLUE_MASTER_POSITION;
-    uint64_t blueMasterPosition = (state.pieces & blueMasterPositionMask) >> BLUE_MASTER_POSITION;
-    bool blueMasterReachedTemple = blueMasterPosition == RED_TEMPLE_ARCH_POSITION;
-
-    // 🗻 Way of the Stone.
-    bool redMasterCaptured = state.pieces & (1 << RED_MASTER_STATUS);
+    bool blueMasterReachedTemple = getMasterPosition(state, BLUE) == 22;
+    bool redMasterCaptured = state.pieces & (1 << 30);
     return blueMasterReachedTemple | redMasterCaptured;
 }
 
 bool redWon(GameState state) {
-    const int BLUE_TEMPLE_ARCH_POSITION = 2;
-    const int RED_MASTER_POSITION = 31;
-
-    // 🌊 Way of the Stream.
-    uint64_t redMasterPositionMask = 0b11111LL << RED_MASTER_POSITION;
-    uint64_t redMasterPosition = (state.pieces & redMasterPositionMask) >> RED_MASTER_POSITION;
-    bool redMasterReachedTemple = redMasterPosition == BLUE_TEMPLE_ARCH_POSITION;
-
-    // 🗻 Way of the Stone.
+    bool redMasterReachedTemple = getMasterPosition(state, RED) == 2;
     bool blueMasterCaptured = state.pieces & 1;
     return redMasterReachedTemple | blueMasterCaptured;
 }
