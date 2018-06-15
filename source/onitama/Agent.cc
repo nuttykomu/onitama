@@ -35,13 +35,16 @@ bool Agent::updateState(GameState state, Move move) {
 
 std::vector<Node *> Agent::run(int iterations) {
     for (int i = 0; i < iterations; i++) {
-        std::cout << i << std::endl;
         this->state = this->rootState;
         this->currentNode = this->root;
         this->selection();
         this->expansion();
         this->simulation();
         this->backpropagation();
+
+        if (i % 500 == 0) {
+            std::cout << i << " iterations completed." << std::endl;
+        }
     }
     return this->root->children;
 }
@@ -51,41 +54,50 @@ void Agent::selection() {
         double maxScore = 0;
         for (Node *child : this->currentNode->children) {
             double nodeScore = computeUCT(child);
-            if (nodeScore > maxScore) {
+            if (nodeScore >= maxScore) {
                 maxScore = nodeScore;
                 this->currentNode = child;
             }
         }
-        std::cout << this->currentNode->move.start << " " << this->currentNode->children.size() << std::endl;
         this->state = applyMove(this->state, this->currentNode->move);
         this->selection();
     }
 }
 
 void Agent::expansion() {
-    int index = 0;
-    for (auto move : getMoves(this->state)) {
-        Node *child = new Node;
-        child->parent = this->currentNode;
-        child->playouts = 0;
-        child->wins = 0;
-        child->move = move;
-        this->currentNode->children.push_back(child);
-    }
+    auto moves = getMoves(this->state);
+    std::uniform_int_distribution<int> selectMove(0, moves.size() - 1);
+    bool nodeAlreadyExists = false;
+    Move move;
+
+    do {
+        move = moves[selectMove(this->generator)];
+        for (auto child : this->currentNode->children) {
+            if (child->move.card == move.card &&
+                child->move.start == move.start &&
+                child->move.end == move.end) {
+                nodeAlreadyExists == true;
+            }
+        }
+    } while (nodeAlreadyExists);
+
+    Node *child = new Node;
+    child->parent = this->currentNode;
+    child->playouts = 0;
+    child->wins = 0;
+    child->move = move;
+    this->currentNode->children.push_back(child);
+
+    this->state = applyMove(this->state, move);
+    this->currentNode = child;
 }
 
 void Agent::simulation() {
     while (!hasVictory(this->state, BLUE) && !hasVictory(this->state, RED)) {
         auto moves = getMoves(this->state);
         std::uniform_int_distribution<int> selectMove(0, moves.size() - 1);
-        Node *child = new Node;
-        child->parent = this->currentNode;
-        child->playouts = 0;
-        child->wins = 0;
-        child->move = moves[selectMove(this->generator)];
-        this->currentNode->children.push_back(child);
-        this->currentNode = child;
-        this->state = applyMove(this->state, this->currentNode->move);
+        auto move = moves[selectMove(this->generator)];
+        this->state = applyMove(this->state, move);
     }
 }
 
