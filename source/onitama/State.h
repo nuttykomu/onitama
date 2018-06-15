@@ -61,6 +61,10 @@ struct findMove {
     }
 };
 
+// Constants.
+extern const int BLUE;
+extern const int RED;
+
 extern GameState getNewGameState();
 extern bool hasVictory(GameState state, int color);
 
