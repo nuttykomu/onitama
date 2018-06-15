@@ -13,16 +13,6 @@ Agent::Agent(GameState state, int color)
     this->root->parent = nullptr;
     this->root->playouts = 0;
     this->root->wins = 0;
-
-    int index = 0;
-    for (auto move : getMoves(this->rootState)) {
-        Node *child = new Node;
-        child->parent = this->root;
-        child->playouts = 0;
-        child->wins = 0;
-        child->move = move;
-        this->root->children.push_back(child);
-    }
 }
 
 bool Agent::updateState(GameState state, Move move) {
@@ -34,7 +24,8 @@ bool Agent::updateState(GameState state, Move move) {
 }
 
 std::vector<Node *> Agent::run(int iterations) {
-    for (int i = 0; i < iterations; i++) {
+    while (this->root->playouts < 10000) {
+        this->aborted = false;
         this->state = this->rootState;
         this->currentNode = this->root;
         this->selection();
@@ -42,15 +33,22 @@ std::vector<Node *> Agent::run(int iterations) {
         this->simulation();
         this->backpropagation();
 
-        if (i % 500 == 0) {
-            std::cout << i << " iterations completed." << std::endl;
+        if (this->root->playouts % 500 == 0) {
+            std::cout << this->root->playouts << " playouts. " << std::endl;
         }
     }
     return this->root->children;
 }
 
 void Agent::selection() {
-    if (this->currentNode->children.size() != 0) {
+    // Proceed until you reach a point where not all of the
+    // child positions have statistics recorded.
+    int childrenCount = this->currentNode->children.size();
+    int possibleMoves = getMoves(this->state).size();
+    bool allChildrenVisited = childrenCount == possibleMoves;
+    bool childrenExist = childrenCount != 0;
+
+    if (childrenExist && allChildrenVisited) {
         double maxScore = 0;
         for (Node *child : this->currentNode->children) {
             double nodeScore = computeUCT(child);
@@ -71,6 +69,14 @@ void Agent::expansion() {
     Move move;
 
     do {
+        if (moves.size() == 0) {
+            // This leaf node results in a win/loss for one of the players.
+            // No more possible moves... ABORT MISSION!!!
+            std::cout << this->state.pawns[BLUE][0] << std::endl;
+            this->aborted = true;
+            return;
+        }
+
         move = moves[selectMove(this->generator)];
         for (auto child : this->currentNode->children) {
             if (child->move.card == move.card &&
@@ -102,24 +108,21 @@ void Agent::simulation() {
 }
 
 void Agent::backpropagation() {
-    do {
-        this->currentNode->playouts++;
-        if (this->state.turn == this->color) {
-            this->currentNode->wins++;
-        }
-        this->currentNode = this->currentNode->parent;
-    } while (this->currentNode != nullptr);
+    if (!this->aborted) {
+        do {
+            this->currentNode->playouts++;
+            if (this->state.turn == this->color) {
+                this->currentNode->wins++;
+            }
+            this->currentNode = this->currentNode->parent;
+        } while (this->currentNode != nullptr);
+    }
 }
 
 double Agent::computeUCT(Node *node) {
     double n_i = node->playouts;
     double N_i = node->parent->playouts;
-    if (n_i != 0) {
-        double exploitation = (double)node->wins / node->playouts;
-        double exploration = sqrt(2) * sqrt(log(N_i) / n_i);
-        return exploitation + exploration;
-    }
-    else {
-        return std::numeric_limits<double>::max();
-    }
+    double exploitation = (double)node->wins / node->playouts;
+    double exploration = sqrt(2) * sqrt(log(N_i) / n_i);
+    return exploitation + exploration;
 }

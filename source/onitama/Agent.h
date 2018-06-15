@@ -1,15 +1,16 @@
 #ifndef AGENT_H
 #define AGENT_H
 
+#include <string>
 #include <random>
 
 #include "State.h"
 
 struct Node {
-    uint32_t playouts;
-    uint32_t wins;
+    uint32_t playouts = 0;
+    uint32_t wins = 0;
     Move move;
-    Node *parent;
+    Node parent;
     std::vector<Node *> children;
 };
 
@@ -33,6 +34,7 @@ public:
     double computeUCT(Node *node);
     Node *currentNode;
     GameState state;
+    bool aborted;
 };
 
 #endif

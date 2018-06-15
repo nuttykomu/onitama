@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <array>
 #include <ctime>
 #include <random>
-#include <set>
 #include <vector>
+
 #include "Card.h"
 #include "State.h"
 
@@ -13,93 +14,88 @@ GameState getNewGameState() {
     GameState state = {};
 
     // 1. Set up the pieces on the board.
-    state.pieces |= 0b00010'0LL << (0 * 6);  // Position 02, Not Captured [BLUE MASTER]
-    state.pieces |= 0b00000'0LL << (1 * 6);  // Position 00, Not Captured [BLUE PAWN]
-    state.pieces |= 0b00001'0LL << (2 * 6);  // Position 01, Not Captured [BLUE PAWN]
-    state.pieces |= 0b00011'0LL << (3 * 6);  // Position 03, Not Captured [BLUE PAWN]
-    state.pieces |= 0b00100'0LL << (4 * 6);  // Position 04, Not Captured [BLUE PAWN]
-    state.pieces |= 0b10110'0LL << (5 * 6);  // Position 22, Not Captured [RED MASTER]
-    state.pieces |= 0b10100'0LL << (6 * 6);  // Position 20, Not Captured [RED PAWN]
-    state.pieces |= 0b10101'0LL << (7 * 6);  // Position 21, Not Captured [RED PAWN]
-    state.pieces |= 0b10111'0LL << (8 * 6);  // Position 23, Not Captured [RED PAWN]
-    state.pieces |= 0b11000'0LL << (9 * 6);  // Position 24, Not Captured [RED PAWN]
+    state.master[BLUE].push_back(2);
+    state.pawns[BLUE].push_back(0);
+    state.pawns[BLUE].push_back(1);
+    state.pawns[BLUE].push_back(3);
+    state.pawns[BLUE].push_back(4);
+    state.master[RED].push_back(22);
+    state.pawns[RED].push_back(20);
+    state.pawns[RED].push_back(21);
+    state.pawns[RED].push_back(23);
+    state.pawns[RED].push_back(24);
 
     // 2. Draw five move cards randomly.
-    std::default_random_engine rng((unsigned int)time(0));
-    std::uniform_int_distribution<int> generateCard(0, 15);
-    std::set<int> cardsDrawn;
-
-    while (cardsDrawn.size() < 5) {
-        cardsDrawn.insert(generateCard(rng));
-    }
-
-    int i = 0;
-    for (int card : cardsDrawn) {
-        state.cards |= card << (i++ * 4);
-    }
+    std::array<int, 16> random { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+    shuffle(random.begin(), random.end(), std::default_random_engine((unsigned int)time(0)));
+    state.hand[BLUE].push_back(&CardList[random[0]]);
+    state.hand[BLUE].push_back(&CardList[random[1]]);
+    state.hand[RED].push_back(&CardList[random[2]]);
+    state.hand[RED].push_back(&CardList[random[3]]);
+    state.extraCard = &CardList[random[4]];
 
     // 3. Determine who goes first.
-    const int EXTRA_CARD_OFFSET = 16;
-    int extraCardMask = 0b1111 << EXTRA_CARD_OFFSET;
-    int extraCardIndex = (state.cards & extraCardMask) >> EXTRA_CARD_OFFSET;
-    state.turn = CardList[extraCardIndex].color;
+    state.turn = state.extraCard->color;
 
     return state;
 }
 
 bool hasVictory(GameState state, int color) {
-    int TEMPLE_ARCH = (color == BLUE) ? 22 : 2;
-    int ENEMY_MASTER = (color == BLUE) ? 30 : 0;
-    bool reachedTemple = getMasterPosition(state, color) == TEMPLE_ARCH;
-    bool capturedMaster = state.pieces & (1 << ENEMY_MASTER);
-    return reachedTemple | capturedMaster;
+    const int TEMPLE_ARCH_POSITION = (color == BLUE) ? 22 : 2;
+    const int otherColor = (color == BLUE) ? RED : BLUE;
+    bool reachedTemple = state.master[color].size() != 0 && state.master[color][0] == TEMPLE_ARCH_POSITION;
+    bool capturedMaster = state.master[otherColor].size() == 0;
+    return reachedTemple || capturedMaster;
 }
 
 std::vector<Move> getMoves(GameState state) {
     // Get all starting positions.
-    std::vector<int> positions = getPawnPositions(state, state.turn);
-    positions.push_back(getMasterPosition(state, state.turn));
+    std::vector<int> positions;
+    positions.insert(positions.end(), state.master[state.turn].begin(), state.master[state.turn].end());
+    positions.insert(positions.end(), state.pawns[state.turn].begin(), state.pawns[state.turn].end());
+    
     std::vector<Move> moves;
+    if (!hasVictory(state, BLUE) && !hasVictory(state, RED)) {
+        // For each position, enumerate all possible candidate moves.
+        for (int position : positions) {
+            for (Card *card : state.hand[state.turn]) {
+                for (M move : card->moves) {
 
-    // For each position, enumerate all possible candidate moves.
-    for (int position : positions) {
-        for (const Card card : getCards(state, state.turn)) {
-            for (const M move : card.moves) {
+                    // If RED turn, rotate the board.
+                    int startPosition = position;
+                    if (state.turn == RED) {
+                        startPosition = 24 - position;
+                    }
 
-                // If RED turn, rotate the board.
-                int startPosition = position;
-                if (state.turn == RED) {
-                    startPosition = 24 - position;
-                }
+                    // Generate candidate move.
+                    int shiftX = -move.x;
+                    int shiftY = move.y * 5;
+                    int endPosition = startPosition + shiftX + shiftY;
 
-                // Generate candidate move.
-                int shiftX = -move.x;
-                int shiftY = move.y * 5;
-                int endPosition = startPosition + shiftX + shiftY;
+                    // Test candidate move for valid end position.
+                    int startRow = startPosition / 5;
+                    int endRow = (startPosition + shiftX) / 5;
+                    bool validXShift = startRow == endRow;
+                    bool validYShift = endPosition >= 0 && endPosition < 25;
 
-                // Test candidate move for valid end position.
-                int startRow = startPosition / 5;
-                int endRow = (startPosition + shiftX) / 5;
-                bool validXShift = startRow == endRow;
-                bool validYShift = endPosition >= 0 && endPosition < 25;
+                    // Rotate the board back to original orientation.
+                    if (state.turn == RED) {
+                        startPosition = 24 - startPosition;
+                        endPosition = 24 - endPosition;
+                    }
 
-                // Rotate the board back to original orientation.
-                if (state.turn == RED) {
-                    startPosition = 24 - startPosition;
-                    endPosition = 24 - endPosition;
-                }
+                    // Test candidate move for friendly fire.
+                    auto iterator = std::find(positions.begin(), positions.end(), endPosition);
+                    bool noFriendlyFire = iterator == positions.end();
 
-                // Test candidate move for friendly fire.
-                auto iterator = std::find(positions.begin(), positions.end(), endPosition);
-                bool noFriendlyFire = iterator == positions.end();
-
-                if (validXShift && validYShift && noFriendlyFire) {
-                    Move move = {
-                        /* Card:  */ card.index,
-                        /* Start: */ (unsigned)startPosition,
-                        /* End:   */ (unsigned)endPosition
-                    };
-                    moves.push_back(move);
+                    if (validXShift && validYShift && noFriendlyFire) {
+                        Move move = {
+                            /* Card:  */ card,
+                            /* Start: */ (unsigned)startPosition,
+                            /* End:   */ (unsigned)endPosition
+                        };
+                        moves.push_back(move);
+                    }
                 }
             }
         }
@@ -108,86 +104,49 @@ std::vector<Move> getMoves(GameState state) {
 }
 
 GameState applyMove(GameState state, Move move) {
-    std::vector<Move> validMoves = getMoves(state);
-    auto iterator = std::find_if(validMoves.begin(), validMoves.end(), findMove(move));
-    bool isValidMove = iterator != validMoves.end();
+    const int enemy = (state.turn == BLUE) ? RED : BLUE;
+
+    // Update the piece position.
+    std::replace(
+        state.master[state.turn].begin(),
+        state.master[state.turn].end(),
+        move.start,
+        move.end
+    );
     
-    if (isValidMove) {
-        // Update the piece position.
-        int colorOffset = (state.turn == BLUE) ? 1 : 31;
-        for (int i = 0; i < 5; i++) {
-            uint64_t positionMask = 0b11111LL << (colorOffset + i * 6);
-            uint64_t position = (state.pieces & positionMask) >> (colorOffset + i * 6);
-            if (position == move.start) {
-                state.pieces &= ~(0b11111LL << (colorOffset + i * 6));
-                state.pieces |= (long long)move.end << (colorOffset + i * 6);
-            }
-        }
+    std::replace(
+        state.pawns[state.turn].begin(),
+        state.pawns[state.turn].end(),
+        move.start,
+        move.end
+    );
 
-        // Capture the enemy piece (if applicable).
-        colorOffset = (state.turn == BLUE) ? 31 : 1;
-        for (int i = 0; i < 5; i++) {
-            uint64_t positionMask = 0b11111LL << (colorOffset + i * 6);
-            uint64_t position = (state.pieces & positionMask) >> (colorOffset + i * 6);
-            if (position == move.end) {
-                state.pieces |= 1LL << (colorOffset + i * 6 - 1);
-            }
-        }
+    // Capture the enemy piece (if applicable).
+    state.master[enemy].erase(
+        std::remove(
+            state.master[enemy].begin(),
+            state.master[enemy].end(),
+            move.end),
+        state.master[enemy].end()
+    );
 
-        // Swap the used card with the extra card.
-        colorOffset = (state.turn == BLUE) ? 0 : 8;
-        for (int i = 0; i < 2; i++) {
-            uint32_t cardMask = 0b1111 << (colorOffset + i * 4);
-            uint32_t cardIndex = (state.cards & cardMask) >> (colorOffset + i * 4);
-            if (cardIndex == move.card) {
-                state.cards &= ~(0b1111 << (colorOffset + i * 4));
-                state.cards |= getExtraCard(state).index << (colorOffset + i * 4);
-                state.cards &= ~(0b1111 << 16);
-                state.cards |= move.card << 16;
-            }
-        }
+    state.pawns[enemy].erase(
+        std::remove(
+            state.pawns[enemy].begin(),
+            state.pawns[enemy].end(),
+            move.end),
+        state.pawns[enemy].end()
+    );
 
-        // Update the turn color.
-        state.turn = (state.turn == BLUE) ? RED : BLUE;
+    // Swap the used card with the extra card.
+    for (int i = 0; i < 2; i++) {
+        if (state.hand[state.turn][i] == move.card) {
+            std::swap(state.hand[state.turn][i], move.card);
+        }
     }
+
+    // Update the turn color.
+    state.turn = (state.turn == BLUE) ? RED : BLUE;
 
     return state;
-}
-
-std::vector<int> getPawnPositions(GameState state, int color) {
-    std::vector<int> positions;
-    int colorOffset = (color == BLUE) ? 6 : 36;
-    for (int i = 0; i < 4; i++) {
-        bool isCaptured = state.pieces & (1 << colorOffset + i * 6);
-        if (!isCaptured) {
-            uint64_t positionMask = 0b11111LL << (colorOffset + i * 6 + 1);
-            uint64_t position = (state.pieces & positionMask) >> (colorOffset + i * 6 + 1);
-            positions.push_back(position);
-        }
-    }
-    return positions;
-}
-
-int getMasterPosition(GameState state, int color) {
-    int positionOffset = (color == BLUE) ? 1 : 31;
-    uint64_t positionMask = 0b11111LL << positionOffset;
-    return (state.pieces & positionMask) >> positionOffset;
-}
-
-std::vector<Card> getCards(GameState state, int color) {
-    std::vector<Card> cards;
-    int colorOffset = (color == BLUE) ? 0 : 8;
-    for (int i = 0; i < 2; i++) {
-        uint32_t cardMask = 0b1111 << (colorOffset + i * 4);
-        uint32_t cardIndex = (state.cards & cardMask) >> (colorOffset + i * 4);
-        cards.push_back(CardList[cardIndex]);
-    }
-    return cards;
-}
-
-Card getExtraCard(GameState state) {
-    int offset = 16;
-    uint32_t cardMask = 0b1111 << offset;
-    uint32_t cardIndex = (state.cards & cardMask) >> offset;
-    return CardList[cardIndex];
 }
