@@ -6,24 +6,33 @@
 #include "State.h"
 
 struct Node {
-    uint32_t childrenCount;
     uint32_t playouts;
     uint32_t wins;
-    Node *parent;
-    Node **children;
     Move move;
+    Node *parent;
+    std::vector<Node *> children;
 };
 
 class Agent {
 public:
     Agent(GameState state, int color);
     bool updateState(GameState state, Move move);
-    Node **run(int iterations);
+    std::vector<Node *> run(int iterations);
+
 //private:
     std::default_random_engine generator;
-    GameState state;
+    GameState rootState;
     Node *root;
     int color;
+
+    // Monte Carlo Tree Search.
+    void selection();
+    void expansion();
+    void simulation();
+    void backpropagation();
+    double computeUCT(Node *node);
+    Node *currentNode;
+    GameState state;
 };
 
 #endif
