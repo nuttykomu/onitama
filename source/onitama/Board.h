@@ -5,9 +5,7 @@
 
 class Board {
 public:
-    // ╔══════════════════════════════════════════╗
-    // ║ TODO: Put some method declarations here. ║
-    // ╚══════════════════════════════════════════╝
+    Board();
 private:
     uint32_t master[2];
     uint32_t pawns[2];

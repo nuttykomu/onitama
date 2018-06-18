@@ -17,3 +17,12 @@
  * state; resulting from applying a bitwise-OR (|) to all of the bitboards:
  * BM | BP | RM | RP. The least to most significant bit ranges from 0 to 24.
  */
+
+#include "Color.h"
+
+Board::Board() {
+    this->master[🔵] = 1 << 2;
+    this->master[🔴] = 1 << 22;
+    this->pawns[🔵] = (1 << 0) | (1 << 1) | (1 << 3) | (1 << 4);
+    this->pawns[🔴] = (1 << 20) | (1 << 21) | (1 << 23) | (1 << 24);
+}
