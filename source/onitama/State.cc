@@ -29,6 +29,22 @@ State State::clone() {
     return clone;
 }
 
+std::vector<Move> State::get_moves() {
+    std::vector<Move> moves;
+    auto positions = this->board.get_positions(this->turn);
+    for (auto start : positions) {
+        for (int i = 0; i < 2; i++) {
+            Card card = this->hand[this->turn][i];
+            auto move_bitboard = MOVES[this->turn][card.index][start];
+            auto allies = this->board.master[this->turn] | this->board.pawns[this->turn];
+            for (auto end : get_bit_indices(move_bitboard & ~allies)) {
+                moves.push_back({card.index, start, end});
+            }
+        }
+    }
+    return moves;
+}
+
 std::ostream& operator<<(std::ostream& os, const State& state) {
     std::string lines[7];
     lines[0] = "  +---------------+";

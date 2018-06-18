@@ -4,13 +4,15 @@
 #include "Board.h"
 #include "Card.h"
 #include "Color.h"
+#include "Move.h"
 
 class State {
 public:
     void initialize();
     State clone();
+    std::vector<Move> get_moves();
     friend std::ostream& operator<<(std::ostream&, const State&);
-private:
+//private:
     Board board;
     Card hand[2][2];
     Card extra_card;
