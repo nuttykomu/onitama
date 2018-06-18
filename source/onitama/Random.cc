@@ -1,3 +1,4 @@
+#include <chrono>
 #include "Random.h"
 
 // If globals are evil, then so are
@@ -5,8 +6,8 @@
 std::mt19937 RNG;
 
 void seed_rng() {
-    std::random_device rd;
-    RNG = std::mt19937(rd());
+    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    RNG = std::mt19937(seed);
 }
 
 std::uniform_int_distribution<int> int_generator(int min, int max) {
