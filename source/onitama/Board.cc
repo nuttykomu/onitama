@@ -35,3 +35,30 @@ Board Board::clone() {
     clone.pawns[🔴] = this->pawns[🔴];
     return clone;
 }
+
+std::vector<int> Board::get_positions(Color color) {
+    auto bitboard = this->master[color] | this->pawns[color];
+    return get_bit_indices(bitboard);
+}
+
+const int debruijn_table[32] = {
+     0,  1, 28,  2, 29, 14, 24,  3,
+    30, 22, 20, 15, 25, 17,  4,  8, 
+    31, 27, 13, 23, 21, 19, 16,  7,
+    26, 12, 18,  6, 11,  5, 10,  9
+};
+
+// Find the indices of all of the set bits in the bitboard, 'bb'.
+// This function makes use of de Bruijn sequences (⚫✨) to quickly find
+// the index of the next least significant bit in the bitboard.
+//
+// https://en.wikipedia.org/wiki/De_Bruijn_sequence
+std::vector<int> get_bit_indices(uint32_t bb) {
+    std::vector<int> positions;
+    while (bb != 0) {
+        int position = debruijn_table[((bb & -bb) * 0x077CB531U) >> 27];
+        positions.push_back(position);
+        bb &= ~(1 << position);
+    }
+    return positions;
+}
