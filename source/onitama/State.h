@@ -9,6 +9,7 @@ class State {
 public:
     void initialize();
     State clone();
+    friend std::ostream& operator<<(std::ostream&, const State&);
 private:
     Board board;
     Card hand[2][2];
