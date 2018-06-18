@@ -45,6 +45,23 @@ std::vector<Move> State::get_moves() {
     return moves;
 }
 
+void State::apply_move(Move move) {
+    if (this->board.master[this->turn] & (1 << move.start)) {
+        this->board.master[this->turn] &= ~(1 << move.start);
+        this->board.master[this->turn] |= 1 << move.end;
+    }
+    else if (this->board.pawns[this->turn] & (1 << move.start)) {
+        this->board.pawns[this->turn] &= ~(1 << move.start);
+        this->board.pawns[this->turn] |= 1 << move.end;
+    }
+    for (int i = 0; i < 2; i++) {
+        if (this->hand[this->turn][i].index == move.card) {
+            std::swap(this->hand[this->turn][i], this->extra_card);
+        }
+    }
+    this->turn = (this->turn == 🔵) ? 🔴 : 🔵;
+}
+
 std::ostream& operator<<(std::ostream& os, const State& state) {
     std::string lines[7];
     lines[0] = "  +---------------+";

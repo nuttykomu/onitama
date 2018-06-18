@@ -11,6 +11,7 @@ public:
     void initialize();
     State clone();
     std::vector<Move> get_moves();
+    void apply_move(Move move);
     friend std::ostream& operator<<(std::ostream&, const State&);
 //private:
     Board board;
