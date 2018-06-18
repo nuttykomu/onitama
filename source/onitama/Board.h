@@ -6,6 +6,7 @@
 class Board {
 public:
     Board();
+    Board clone();
 private:
     uint32_t master[2];
     uint32_t pawns[2];

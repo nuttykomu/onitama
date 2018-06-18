@@ -26,3 +26,12 @@ Board::Board() {
     this->pawns[🔵] = (1 << 0) | (1 << 1) | (1 << 3) | (1 << 4);
     this->pawns[🔴] = (1 << 20) | (1 << 21) | (1 << 23) | (1 << 24);
 }
+
+Board Board::clone() {
+    Board clone;
+    clone.master[🔵] = this->master[🔵];
+    clone.master[🔴] = this->master[🔴];
+    clone.pawns[🔵] = this->pawns[🔵];
+    clone.pawns[🔴] = this->pawns[🔴];
+    return clone;
+}
