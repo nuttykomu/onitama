@@ -10,6 +10,6 @@ struct Move {
 };
 
 void precompute_moves();
-extern uint32_t MOVES[16][25];
+extern uint32_t MOVES[2][16][25];
 
 #endif
