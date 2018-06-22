@@ -12,6 +12,7 @@ public:
     State clone();
     std::vector<Move> get_moves();
     void apply_move(Move move);
+    bool has_victory(Color color);
     friend std::ostream& operator<<(std::ostream&, const State&);
 //private:
     Board board;

@@ -63,6 +63,21 @@ void State::apply_move(Move move) {
     this->turn = (this->turn == 🔵) ? 🔴 : 🔵;
 }
 
+bool State::has_victory(Color color) {
+    // Way of the Stream...
+    bool temple_reached =
+        this->board.master[color] ==
+        (color == 🔵 ? 1 << 22 : 1 << 2);
+
+    // Way of the Stone...
+    bool master_captured =
+        (color == 🔵) ?
+        (this->board.master[🔴] == 0) :
+        (this->board.master[🔵] == 0);
+
+    return temple_reached || master_captured;
+}
+
 std::ostream& operator<<(std::ostream& os, const State& state) {
     std::string lines[7];
     lines[0] = "  +---------------+";
