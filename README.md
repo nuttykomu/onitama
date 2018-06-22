@@ -25,6 +25,16 @@ clang benchmark.cc Board.cc Card.cc Move.cc State.cc Random.cc Agent.cc
 ./benchmark
 ```
 
+## Profiling
+
+To generate a code profile report, run:
+
+```
+sh benchmark.sh
+```
+
+This outputs a visual graph (`report.pdf`) that provides a [visualization](https://github.com/jrfonseca/gprof2dot#output) of the "hot-spot" function calls. Make sure that `g++`, `gprof`, `gprof2dot`, and `dot` can be located in your `$PATH`.
+
 ## High Scores
 
 Benchmarks were executed on an Intel Core i7-6700 CPU @ 3.40GHz. Scores are averaged over 10 runs.
