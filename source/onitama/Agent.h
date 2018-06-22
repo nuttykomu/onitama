@@ -18,7 +18,7 @@ struct Node {
 class Agent {
 public:
     Agent(State state, Color color);
-    std::vector<Node *> run(int iterations); 
+    std::vector<Node *> run(int seconds); 
 private:
     Node *tree_policy(Node *node, State &state);
     Color default_policy(State state);

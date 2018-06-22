@@ -1,4 +1,6 @@
 #include <cmath>
+#include <ctime>
+#include <iostream>
 #include <limits>
 
 #include "Agent.h"
@@ -12,13 +14,17 @@ Agent::Agent(State state, Color color)
     this->root_node->wins = 0;
 }
 
-std::vector<Node *> Agent::run(int iterations) {
-    for (int i = 0; i < iterations; i++) {
+std::vector<Node *> Agent::run(int seconds) {
+    int iterations = 0;
+    std::clock_t start_time = std::clock();
+    while ((std::clock() - start_time) / (double)CLOCKS_PER_SEC < seconds) {
         State state = this->root_state.clone();
         Node *expanded_node = tree_policy(this->root_node, state);
         Color winner = default_policy(state);
         backpropogate_rewards(expanded_node, winner);
+        iterations++;
     }
+    std::cout << iterations << " iterations completed..." << std::endl;
     return root_node->children;
 }
 
