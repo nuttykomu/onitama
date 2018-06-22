@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <iostream>
 #include <string>
 
 #include "Card.h"
@@ -31,17 +32,22 @@ State State::clone() {
 }
 
 std::vector<Move> State::get_moves() {
+    const int INVALID_POSITION = 25;
     std::vector<Move> moves;
-    auto positions = this->board.get_positions(this->turn);
-    for (auto start : positions) {
+    moves.reserve(20);
+    auto start = this->board.get_positions(this->turn);
+    while (*start != INVALID_POSITION) {
         for (int i = 0; i < 2; i++) {
-            Card card = this->hand[this->turn][i];
-            auto move_bitboard = MOVES[this->turn][card.index][start];
+            Card &card = this->hand[this->turn][i];
+            auto move_bitboard = MOVES[this->turn][card.index][*start];
             auto allies = this->board.master[this->turn] | this->board.pawns[this->turn];
-            for (auto end : get_bit_indices(move_bitboard & ~allies)) {
-                moves.push_back({card.index, start, end});
+            auto end = get_bit_indices(move_bitboard & ~allies);
+            while (*end != INVALID_POSITION) {
+                moves.push_back({card.index, *start, *end});
+                end++;
             }
         }
+        start++;
     }
     /**
      * "It is possible that you will find that you cannot use any of your cards
