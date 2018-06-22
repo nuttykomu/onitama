@@ -26,6 +26,7 @@ State State::clone() {
     clone.hand[🔴][0] = this->hand[🔴][0];
     clone.hand[🔴][1] = this->hand[🔴][1];
     clone.extra_card = this->extra_card;
+    clone.turn = this->turn;
     return clone;
 }
 
