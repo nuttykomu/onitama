@@ -10,6 +10,6 @@ void seed_rng() {
     RNG = std::mt19937(seed);
 }
 
-std::uniform_int_distribution<int> int_generator(int min, int max) {
+std::uniform_int_distribution<int> get_generator(int min, int max) {
     return std::uniform_int_distribution<int>(min, max);
 }

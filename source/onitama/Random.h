@@ -4,7 +4,7 @@
 #include <random>
 
 void seed_rng();
-auto get_distribution(int, int);
+std::uniform_int_distribution<int> get_generator(int, int);
 
 extern std::mt19937 RNG;
 
