@@ -4,8 +4,6 @@
 #include "Agent.h"
 #include "Random.h"
 
-int nodes = 0;
-
 Agent::Agent(State state, Color color)
     : root_state(state), color(color) {
     this->root_node = new Node;
@@ -42,7 +40,6 @@ Node *Agent::tree_policy(Node *node, State &state) {
                     }
                 }
                 Node *child = new Node;
-                nodes++;
                 child->parent = node;
                 child->playouts = 0;
                 child->wins = 0;
