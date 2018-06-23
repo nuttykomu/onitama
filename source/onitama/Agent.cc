@@ -69,25 +69,28 @@ Node *Agent::tree_policy(Node *node, State &state) {
         auto picker = get_generator(0, moves.size() - 1);
         // if the current node is expandable, expand it...
         if (node->children.size() < moves.size()) {
-            while (true) {
-                auto move = moves[picker(RNG)];
+            Move move;
+            bool child_exists = true;
+            while (child_exists) {
+                child_exists = false;
+                move = moves[picker(RNG)];
                 // check if the child already exists
                 for (auto child : node->children) {
                     if (child->move.card == move.card &&
                         child->move.start == move.start &&
                         child->move.end == move.end) {
-                        continue;
+                        child_exists = true;
                     }
                 }
-                Node *child = new Node;
-                child->parent = node;
-                child->playouts = 0;
-                child->wins = 0;
-                child->move = move;
-                node->children.push_back(child);
-                state.apply_move(move);
-                return child;
             }
+            Node *child = new Node;
+            child->parent = node;
+            child->playouts = 0;
+            child->wins = 0;
+            child->move = move;
+            node->children.push_back(child);
+            state.apply_move(move);
+            return child;
         }
         // ...otherwise, select the best child node.
         else {
