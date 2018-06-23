@@ -2,30 +2,64 @@
 #include <ctime>
 #include <iostream>
 #include <limits>
+#include <thread>
 
 #include "Agent.h"
 #include "Random.h"
 
 Agent::Agent(State state, Color color)
     : root_state(state), color(color) {
-    this->root_node = new Node;
-    this->root_node->parent = nullptr;
-    this->root_node->playouts = 0;
-    this->root_node->wins = 0;
+    for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+        this->root_node[i] = new Node;
+        this->root_node[i]->parent = nullptr;
+        this->root_node[i]->playouts = 0;
+        this->root_node[i]->wins = 0;
+    }
 }
 
 std::vector<Node *> Agent::run(int seconds) {
+    this->start_time = std::clock();
+    // construct multiple MCTS trees in parallel
+    std::thread mcts_agents[NUMBER_OF_THREADS];
+    for (int id = 0; id < NUMBER_OF_THREADS; id++) {
+        mcts_agents[id] = std::thread(&Agent::run_aux, this, seconds, id);
+    }
+    // synchronize the threads
+    for (int id = 0; id < NUMBER_OF_THREADS; id++) {
+        mcts_agents[id].join();
+    }
+    // merge the root children together
+    std::vector<Node *> merged_children = this->root_node[0]->children;
+    for (int id = 1; id < NUMBER_OF_THREADS; id++) {
+        for (auto thread_child : this->root_node[id]->children) {
+            for (auto merged_child : merged_children) {
+                if (merged_child->move.card == thread_child->move.card &&
+                    merged_child->move.start == thread_child->move.start &&
+                    merged_child->move.end == thread_child->move.end) {
+                    merged_child->playouts += thread_child->playouts;
+                    merged_child->wins += thread_child->wins;
+                }
+            }
+        }
+    }
+    // compute how many total iterations were completed
     int iterations = 0;
-    std::clock_t start_time = std::clock();
-    while ((std::clock() - start_time) / (double)CLOCKS_PER_SEC < seconds) {
-        State state = this->root_state.clone();
-        Node *expanded_node = tree_policy(this->root_node, state);
-        Color winner = default_policy(state);
-        backpropogate_rewards(expanded_node, winner);
-        iterations++;
+    for (int id = 0; id < NUMBER_OF_THREADS; id++) {
+        iterations += this->iterations[id];
     }
     std::cout << iterations << " iterations completed..." << std::endl;
-    return root_node->children;
+    return merged_children;
+}
+
+void Agent::run_aux(int seconds, int id) {
+    this->iterations[id] = 0;
+    while ((std::clock() - this->start_time) / (double)CLOCKS_PER_SEC < seconds) {
+        State state = this->root_state.clone();
+        Node *expanded_node = tree_policy(this->root_node[id], state);
+        Color winner = default_policy(state);
+        backpropogate_rewards(expanded_node, winner);
+        this->iterations[id]++;
+    }
 }
 
 Node *Agent::tree_policy(Node *node, State &state) {
@@ -39,8 +73,8 @@ Node *Agent::tree_policy(Node *node, State &state) {
                 auto move = moves[picker(RNG)];
                 // check if the child already exists
                 for (auto child : node->children) {
-                    if (child->move.card == move.card ||
-                        child->move.start == move.start ||
+                    if (child->move.card == move.card &&
+                        child->move.start == move.start &&
                         child->move.end == move.end) {
                         continue;
                     }

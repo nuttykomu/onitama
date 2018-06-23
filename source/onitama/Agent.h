@@ -7,6 +7,8 @@
 #include "Move.h"
 #include "State.h"
 
+#define NUMBER_OF_THREADS (16)
+
 struct Node {
     double playouts;
     double wins;
@@ -18,7 +20,8 @@ struct Node {
 class Agent {
 public:
     Agent(State state, Color color);
-    std::vector<Node *> run(int seconds); 
+    std::vector<Node *> run(int seconds);
+    void run_aux(int seconds, int id);
 private:
     Node *tree_policy(Node *node, State &state);
     Color default_policy(State state);
@@ -26,7 +29,9 @@ private:
     double compute_ucb1(Node *node);
     Color color;
     State root_state;
-    Node *root_node;
+    Node *root_node[NUMBER_OF_THREADS];
+    int iterations[NUMBER_OF_THREADS];
+    std::clock_t start_time;
 };
 
 #endif
