@@ -32,22 +32,21 @@ State State::clone() {
 }
 
 std::vector<Move> State::get_moves() {
-    const int INVALID_POSITION = 25;
     std::vector<Move> moves;
     moves.reserve(20);
-    auto start = this->board.get_positions(this->turn);
-    while (*start != INVALID_POSITION) {
+    auto positions = this->board.get_positions(this->turn);
+    for (auto start : positions) {
+        if (start == 25) continue;
         for (int i = 0; i < 2; i++) {
             Card &card = this->hand[this->turn][i];
-            auto move_bitboard = MOVES[this->turn][card.index][*start];
+            auto move_bitboard = MOVES[this->turn][card.index][start];
             auto allies = this->board.master[this->turn] | this->board.pawns[this->turn];
-            auto end = get_bit_indices(move_bitboard & ~allies);
-            while (*end != INVALID_POSITION) {
-                moves.push_back({card.index, *start, *end});
-                end++;
+            for (auto end : get_bit_indices(move_bitboard & ~allies)) {
+                if (end != 25) {
+                    moves.push_back({card.index, start, end});
+                }
             }
         }
-        start++;
     }
     /**
      * "It is possible that you will find that you cannot use any of your cards

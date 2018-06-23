@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "Color.h"
 
 /**
  * The board is represented as four 25-bit bitboards (blue master, red master,
@@ -18,8 +19,6 @@
  * BM | BP | RM | RP. The least to most significant bit ranges from 0 to 24.
  */
 
-#include "Color.h"
-
 Board::Board() {
     this->master[🔵] = 1 << 2;
     this->master[🔴] = 1 << 22;
@@ -36,7 +35,7 @@ Board Board::clone() {
     return clone;
 }
 
-int *Board::get_positions(Color color) {
+std::array<int, 5> Board::get_positions(Color color) {
     auto bitboard = this->master[color] | this->pawns[color];
     return get_bit_indices(bitboard);
 }
@@ -53,14 +52,16 @@ const int debruijn_table[32] = {
 // the index of the next least significant bit in the bitboard.
 //
 // https://en.wikipedia.org/wiki/De_Bruijn_sequence
-int *get_bit_indices(uint32_t bb) {
-    int *positions = new int[6];
+std::array<int, 5> get_bit_indices(uint32_t bb) {
+    std::array<int, 5> positions;
     int index = 0;
     while (bb != 0) {
         int position = debruijn_table[((bb & -bb) * 0x077CB531U) >> 27];
         bb &= ~(1 << position);
         positions[index++] = position;
     }
-    positions[index] = 25;
+    while (index < 5) {
+        positions[index++] = 25;
+    }
     return positions;
 }
