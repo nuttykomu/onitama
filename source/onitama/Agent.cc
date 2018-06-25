@@ -17,6 +17,36 @@ Agent::Agent(State state, Color color)
     }
 }
 
+void Agent::delete_tree(Node *node) {
+    if (node->children.size() == 0) {
+        return;
+    }
+    for (auto child : node->children) {
+        this->delete_tree(child);
+    }
+    delete node;
+}
+
+void Agent::update(Move move) {
+    this->root_state.apply_move(move);
+    for (int id = 0; id < NUMBER_OF_THREADS; id++) {
+        Node *new_root = nullptr;
+        for (auto child : this->root_node[id]->children) {
+            if (child->move.card == move.card &&
+                child->move.start == move.start &&
+                child->move.end == move.end) {
+                new_root = child;
+            }
+            else {
+                // delete unreachable branches
+                this->delete_tree(child);
+            }
+        }
+        // update the root node
+        this->root_node[id] = new_root;
+    }
+}
+
 std::vector<Node *> Agent::run(int seconds) {
     this->start_time = std::clock();
     // construct multiple MCTS trees in parallel
@@ -83,6 +113,7 @@ Node *Agent::tree_policy(Node *node, State &state) {
                     }
                 }
             }
+            // node expansion
             Node *child = new Node;
             child->parent = node;
             child->playouts = 0;

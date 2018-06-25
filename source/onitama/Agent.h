@@ -20,9 +20,11 @@ struct Node {
 class Agent {
 public:
     Agent(State state, Color color);
+    void update(Move move);
     std::vector<Node *> run(int seconds);
     void run_aux(int seconds, int id);
 private:
+    void delete_tree(Node *node);
     Node *tree_policy(Node *node, State &state);
     Color default_policy(State state);
     void backpropogate_rewards(Node *node, Color result);
