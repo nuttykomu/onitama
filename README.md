@@ -35,7 +35,7 @@ To generate a code profile report, run:
 sh benchmark.sh
 ```
 
-This outputs a visual graph (`report.pdf`) that provides a [visualization](https://github.com/jrfonseca/gprof2dot#output) of the "hot-spot" function calls. Make sure that `g++`, `gprof`, `gprof2dot`, and `dot` can be located in your `$PATH`.
+This outputs a visual graph (`report.pdf`) that provides a [visualization](https://github.com/jrfonseca/gprof2dot#output) of the "hot-spot" function calls. Make sure that `g++`, `gprof`, `gprof2dot`, and `dot` can be located in your `$PATH`. If your system is Microsoft Windows, MinGW must be installed with the `POSIX` threads option.
 
 ## High Scores
 
