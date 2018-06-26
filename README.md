@@ -16,7 +16,16 @@ Compile with `clang++` because `g++` does not support unicode variable identifie
 
 ```
 git clone https://github.com/nuttykomu/onitama.git && cd source/onitama
-clang benchmark.cc Board.cc Card.cc Move.cc State.cc Random.cc Agent.cc
+clang benchmark.cc Agent.cc Board.cc Card.cc Move.cc Random.cc State.cc
+clang main.cc Agent.cc Board.cc Card.cc Move.cc Random.cc State.cc
+```
+
+## Play
+
+To play against the AI agent, execute the driver program:
+
+```
+./main
 ```
 
 ## Benchmark
