@@ -108,10 +108,10 @@ std::ostream& operator<<(std::ostream& os, const State& state) {
 
     for (int i = 0; i < 25; i++) {
         int index = i / 5 + 1;
-        if      (state.board.master[🔵] & (1 << i)) lines[index] += " M ";
-        else if (state.board.master[🔴] & (1 << i)) lines[index] += " m ";
-        else if (state.board.pawns[🔵] & (1 << i))  lines[index] += " P ";
-        else if (state.board.pawns[🔴] & (1 << i))  lines[index] += " p ";
+        if      (state.board.master[🔵] & (1 << i)) lines[index] += " @ ";
+        else if (state.board.master[🔴] & (1 << i)) lines[index] += " # ";
+        else if (state.board.pawns[🔵] & (1 << i))  lines[index] += " o ";
+        else if (state.board.pawns[🔴] & (1 << i))  lines[index] += " x ";
         else lines[index] += " . ";
     }
 
