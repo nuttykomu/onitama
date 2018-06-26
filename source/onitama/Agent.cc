@@ -77,7 +77,7 @@ std::vector<Node *> Agent::run(int seconds) {
     for (int id = 0; id < NUMBER_OF_THREADS; id++) {
         iterations += this->iterations[id];
     }
-    std::cout << iterations << " iterations completed..." << std::endl;
+    std::cout << "  > " << iterations << " iterations were completed..." << std::endl;
     return merged_children;
 }
 
