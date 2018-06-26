@@ -65,6 +65,7 @@ std::vector<Move> State::get_moves() {
 }
 
 void State::apply_move(Move move) {
+    Color enemy = (this->turn == 🔵) ? 🔴 : 🔵;
     if (this->board.master[this->turn] & (1 << move.start)) {
         this->board.master[this->turn] &= ~(1 << move.start);
         this->board.master[this->turn] |= 1 << move.end;
@@ -73,12 +74,16 @@ void State::apply_move(Move move) {
         this->board.pawns[this->turn] &= ~(1 << move.start);
         this->board.pawns[this->turn] |= 1 << move.end;
     }
+    // capture enemy piece
+    this->board.master[enemy] &= ~(1 << move.end);
+    this->board.pawns[enemy] &= ~(1 << move.end);
+    // switch used card with extra card
     for (int i = 0; i < 2; i++) {
         if (this->hand[this->turn][i].index == move.card) {
             std::swap(this->hand[this->turn][i], this->extra_card);
         }
     }
-    this->turn = (this->turn == 🔵) ? 🔴 : 🔵;
+    this->turn = enemy;
 }
 
 bool State::has_victory(Color color) {
