@@ -10,10 +10,20 @@
 Agent::Agent(State state, Color color)
     : root_state(state), color(color) {
     for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+        // initialize root
         this->root_node[i] = new Node;
         this->root_node[i]->parent = nullptr;
         this->root_node[i]->playouts = 0;
         this->root_node[i]->wins = 0;
+        // initial expansion
+        for (auto move : state.get_moves()) {
+            Node *child = new Node;
+            child->parent = this->root_node[i];
+            child->move = move;
+            child->playouts = 0;
+            child->wins = 0;
+            this->root_node[i]->children.push_back(child);
+        }
     }
 }
 
